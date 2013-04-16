@@ -1,0 +1,40 @@
+\documentclass[13pt]{article}
+\usepackage{graphicx}    % needed for including graphics e.g. EPS, PS
+\topmargin -1.5cm        % read Lamport p.163
+\oddsidemargin -0.04cm   % read Lamport p.163
+\evensidemargin -0.04cm  % same as oddsidemargin but for left-hand pages
+\textwidth 16.5cm
+\textheight 21.94cm 
+%\pagestyle{empty}       % Uncomment if don't want page numbers
+\parskip 8.3pt           % sets spacing between paragraphs
+%\renewcommand{\baselinestretch}{1.5} % Uncomment for 1.5 spacing between lines
+\parindent 0pt		 % sets leading space for paragraphs
+
+\begin{document}         
+%
+
+\section*{Augmented Reality Environment with Virtual Fixtures for Robotic Teleoperation in Space}
+
+This paper describes a method of teleoperating a robot to perform repairs to spacecraft beyond low earth orbit where there are significant time delays. Human presence is currently not possible at the distances of geostationary orbit where there are several satellites need repairing so as to restore functionality and prevent hazards to other space craft.
+
+Traditional teleoperation systems using force feedback become unstable and unusable with delays as little as a hundred milliseconds while teleoperating robots in space can lead to delays of several seconds.
+
+This paper describes two current forms of control for systems operating with delays of several seconds. Firstly a method where the operator gives high level, goal oriented, commands to the robot with a control loop local to the robot issuing low level commands to implement the commands from the operator.  There are however issues with sensing the remote environment and automating the physical interaction between the robot and the environment at the remote site. The second method uses a simulated environment to create the sequence of motion commands which are sent to the robot. This technique suffers from the difficulty of not being able to simulate the remote environment accurately. 
+
+The approach proposed in this paper uses virtual fixtures to define motion constraints which prevent the robot being able to move outside the bounds of the fixture. The function of a virtual fixture is similar to that of a physical ruler which can be used to draw straight lines. The ruler prevents the pen from moving in anyway except for in the straight line. With this method a user is able to define virtual fixtures in the environment using an augmented reality framework which overlays the real world data from the robot with the user defining the fixtures as planes or lines which the robot must move along or between.
+
+A test environment has been created using a Da Vinci medical robot as the master controller and a Whole Arm Manipulator (WAM) robot as the slave manipulator. Software is used to simulate the time delay between master and the remote robot. Experiments were carried out using the robot to perform a simple task on an example spacecraft.
+
+The results show that using virtual fixtures dramatically reduces the time to complete the task and errors in movement which can potentially damage the robot or the spacecraft. The experiment was first conducted without using virtual fixtures to create a baseline to compare results to. With no simulated delay the task took 8 minutes but with a delay of four seconds this time increased to 33 minutes and large amounts of damage were inflicted on the spacecraft. Utilising virtual fixtures both of these times were able to be brought below 4 minutes a decrease of 90\% for the time delayed experiment.
+
+
+% Stop your text
+\end{document}
+
+
+
+
+
+
+
+

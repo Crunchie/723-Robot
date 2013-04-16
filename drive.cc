@@ -6,7 +6,7 @@
  * @todo: this has been ported to libplayerc++, but not tested
  */
 
-#define debug
+//#define debug
 
 #include <libplayerc++/playerc++.h>
 #include <iostream>
@@ -61,16 +61,16 @@ int main(int argc, char **argv)
     for(;;)
     {
 
-      // this blocks until new data comes; 10Hz by default
+    // this blocks until new data comes; 10Hz by default
     robot.Read();
 
 	count = lp.GetCount();
 
 	half = count/2;
     //std::cout<<pp.GetXPos()<<"  " <<pp.GetYPos()<<std::endl;
-	if (half < 50)
+	if (count == 0)
 	{
-		std::cout << "fail" << std::endl;
+		std::cout << "No laser Data - rereading" << std::endl;
 	}
 	else{
 		//std::cout << count << std::endl;
@@ -82,46 +82,37 @@ int main(int argc, char **argv)
 
 		if(minAll < MIN_RANGE_AVOID)
     	{
-    		pp.SetSpeed(-0.5,0);
+    		pp.SetSpeed(-0.3,0);
     		std::cout<<"<------AVOIDING-------->"<<std::endl;
 
-    		double turnRate = 0.4;
+    		double turnRate = 0.6;
 
     		if (minLeft < MIN_RANGE_AVOID)
     		{
     			turnRate = turnRate * -1;
     		}
-    		pp.SetSpeed(0.0, turnRate);
+    		pp.SetSpeed(0.1, -turnRate);
 
     		usleep(20000);
-    		pp.SetSpeed(0.1,0);
+    		//pp.SetSpeed(0.1,0);
     		
     		
-    		continue;
+    		continue; // dont continue with leg detection code, avoiding obsticle more important
     	}
 		
-	 	double min = 100;
-	 	int p = 0;
-	 	//std::cout<<"18";
 	 	double legBearing;
 		double legDistance;
-		player_point_2d xy;
 		bool found = false;
-		double x,y;
-		double b = 1000;
 
 		std::vector<laserData> points;
 		std::vector<laserData> legs;
-
-	 	//b=lp.GetBearing();//bearing of first point
-		//for (int i = (half -170); i < (half + 170 ); i++)
 
 		//get all points that could be legs...
 
 		laserData fLeg, bLeg;
 		states legState = nothing;
 
-		for (int i = 1; i < lp.GetCount() -1; i++)
+		for (unsigned int i = 1; i < lp.GetCount() -1; i++)
 		{
 			
 			if ((legState == nothing) && ((lp[i-1] - lp[i]) > GRAD_STEP))//found start of a leg? could be larger object
@@ -142,7 +133,9 @@ int main(int argc, char **argv)
 				if(((bLeg.bearing - fLeg.bearing) < MAX_BEARING_DIFF) && ((bLeg.bearing - fLeg.bearing) > MIN_BEARING_DIFF)) //its a leg?
 				{
 					points.push_back(fLeg);
-					cout<<"one leg"<<endl;
+					#ifdef debug
+						cout<<"added leg"<<endl;
+					#endif
 				}
 				else
 				{
@@ -159,14 +152,7 @@ int main(int argc, char **argv)
 				legState = nothing;
 			}
 
-			//cout<<legState<<endl;
 		}
-
-		/*laserData ld;
-				ld.dist = lp[i];
-				ld.bearing = lp.GetBearing(i); 
-				points.push_back(ld);*/
-		//std::cout<<"1";
 		
 		int num = points.size();
 
@@ -181,11 +167,11 @@ int main(int argc, char **argv)
 			 }
 		}
 		
-		
+		cout<<"<----Found "<<legs.size()<<" Sets of Legs ---------->"<<endl;
 			#ifdef debug
-				cout<<"<----Found "<<legs.size()<<" Legs ---------->"<<endl;
+				
 
-				for (int i = 0; i < legs.size(); ++i)
+				for (unsigned int i = 0; i < legs.size(); ++i)
 				{
 					cout<< legs.at(i).bearing<<" ";
 				}
@@ -196,7 +182,7 @@ int main(int argc, char **argv)
 		{
 
 			legPos = legs.at(0);
-			for (int i = 0; i < legs.size(); ++i)
+			for (unsigned int i = 0; i < legs.size(); ++i)
 			{
 				if(((fabs(legs.at(i).bearing)) - (fabs(previousLegPos.bearing)))
 				  < ((fabs(legPos.bearing)) - (fabs(previousLegPos.bearing))))
@@ -216,12 +202,8 @@ int main(int argc, char **argv)
 			
 			std::cout<<"<------------GOING------------------>"<<std::endl;
 			pp.SetOdometry(0,0,0);
-            //pp.GoTo((pp.GetXPos() + x),(pp.GetYPos() + y), (pp.GetYaw() + legBearing));
-			//pp.GoTo(x,y,legBearing);
-			//std::cout<<pp.GetXPos()<<" "<< y<<std::endl;
 
 			//if within certain range/bearing set to 0 (reached goal)
-			cout<< -(BEARING_EPSILON)<<endl;
 			legBearing = (((legBearing < -(BEARING_EPSILON)) || (legBearing > BEARING_EPSILON)) ? legBearing : 0);
 			legDistance = (((legDistance < -(DISTANCE_EPSILON)) || (legDistance > DISTANCE_EPSILON)) ? legDistance : 0);
 
@@ -232,22 +214,19 @@ int main(int argc, char **argv)
 
 			yaw = yaw * ((absLegBearing));
 
-
-			std::cout<<(SPEED_FACTOR * legDistance)<<" "<< yaw<<" " << abs(legBearing)<<std::endl;
+			#ifdef debug
+				std::cout<<(SPEED_FACTOR * legDistance)<<" "<< yaw<<" " << abs(legBearing)<<std::endl;
+			#endif
 
 			//usleep(10000);
 			pp.SetSpeed((SPEED_FACTOR * legDistance * minAll),yaw);
 
 			
 		}
-		else
+		else //no legs detected - dont do anything
 		{
 			pp.SetSpeed(0,0,0);
 		}
-
-		
-
-		//usleep(500000);
         	
        	}
     }
